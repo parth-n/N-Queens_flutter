@@ -1,50 +1,86 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../provider/n_queens_provider.dart';
-import 'square.dart';
 
 class ChessBoard extends StatelessWidget {
   const ChessBoard({super.key});
+
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<NQueensProvider>(context);
-    final boardSize =
-        MediaQuery.of(context).size.width - 32; // Assuming square board
-
-    return Container(
-      decoration: const BoxDecoration(
-          gradient: LinearGradient(colors: [
-        Color.fromARGB(255, 221, 222, 127),
-        Color.fromARGB(255, 224, 225, 114),
-        Color.fromARGB(255, 223, 225, 94),
-        Color.fromARGB(255, 221, 223, 51),
-        Color.fromARGB(255, 226, 230, 26),
-      ])),
-      child: SizedBox(
-        width: boardSize,
-        height: boardSize,
-        child: Stack(
-          children: [
-            GridView.builder(
-              itemCount: provider.n * provider.n,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: provider.n,
-              ),
-              itemBuilder: (context, index) {
-                final row = index ~/ provider.n;
-                final col = index % provider.n;
-                return Square(row: row, col: col);
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'N-Queens Visualization',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 156, 129, 204),
+      ),
+      body: Column(
+        children: [
+          const SizedBox(height: 16),
+          Expanded(
+            child: Consumer<NQueensProvider>(
+              builder: (context, provider, _) {
+                final boardSize = MediaQuery.of(context).size.width * 0.9;
+                return Center(
+                  child: Container(
+                    width: boardSize,
+                    height: boardSize,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.deepPurple, width: 3),
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: const LinearGradient(
+                        colors: [Colors.deepPurple, Colors.purpleAccent],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: Stack(
+                      children: [
+                        _buildGrid(provider.n, boardSize),
+                        ..._buildQueens(provider, boardSize),
+                      ],
+                    ),
+                  ),
+                );
               },
             ),
-            ..._buildAnimatedQueens(context, provider, boardSize),
-          ],
-        ),
+          ),
+          const SizedBox(height: 16),
+          _buildStatusBar(context),
+          const SizedBox(height: 16),
+        ],
       ),
     );
   }
 
-  List<Widget> _buildAnimatedQueens(
-      BuildContext context, NQueensProvider provider, double boardSize) {
+  Widget _buildGrid(int n, double boardSize) {
+    final cellSize = boardSize / n;
+
+    return GridView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: n,
+      ),
+      itemCount: n * n,
+      itemBuilder: (context, index) {
+        final row = index ~/ n;
+        final col = index % n;
+        final isBlack = (row + col) % 2 == 1;
+
+        return Container(
+          decoration: BoxDecoration(
+            color: isBlack ? Colors.black : Colors.white,
+          ),
+        );
+      },
+    );
+  }
+
+  List<Widget> _buildQueens(NQueensProvider provider, double boardSize) {
     final cellSize = boardSize / provider.n;
 
     return provider.solution.asMap().entries.map((entry) {
@@ -55,24 +91,46 @@ class ChessBoard extends StatelessWidget {
 
       return AnimatedPositioned(
         duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-        top: row * cellSize + 30,
-        left: col * cellSize + 20,
+        top: row * cellSize,
+        left: col * cellSize,
         child: SizedBox(
-            width: cellSize,
-            height: cellSize,
-            child: const Icon(
+          width: cellSize,
+          height: cellSize,
+          child: Center(
+            child: Icon(
               Icons.star,
-              color: Colors.red,
-            )
-            // Center(
-            //   child: Image.asset(
-            //     'assets/images/queen.png',
-            //     fit: BoxFit.contain,
-            //   ),
-            // ), // Add a chess queen image
+              color: Colors.redAccent,
+              size: cellSize * 0.7,
             ),
+          ),
+        ),
       );
     }).toList();
+  }
+
+  Widget _buildStatusBar(BuildContext context) {
+    final provider = Provider.of<NQueensProvider>(context, listen: true);
+    final solved = provider.solution.where((pos) => pos != -1).length;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          'Queens Placed: $solved / ${provider.n}',
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(width: 16),
+        solved == provider.n
+            ? const Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                size: 24,
+              )
+            : const CircularProgressIndicator(),
+      ],
+    );
   }
 }

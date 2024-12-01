@@ -45,12 +45,15 @@ class HomeScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 32, vertical: 16),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                   ),
                   child: const Text(
                     'Start Visualization',
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue),
                   ),
                 ),
               ],
