@@ -12,7 +12,14 @@ class ChessBoard extends StatelessWidget {
         MediaQuery.of(context).size.width - 32; // Assuming square board
 
     return Container(
-      decoration: const BoxDecoration(color: Colors.grey),
+      decoration: const BoxDecoration(
+          gradient: LinearGradient(colors: [
+        Color.fromARGB(255, 221, 222, 127),
+        Color.fromARGB(255, 224, 225, 114),
+        Color.fromARGB(255, 223, 225, 94),
+        Color.fromARGB(255, 221, 223, 51),
+        Color.fromARGB(255, 226, 230, 26),
+      ])),
       child: SizedBox(
         width: boardSize,
         height: boardSize,
@@ -52,15 +59,19 @@ class ChessBoard extends StatelessWidget {
         top: row * cellSize + 30,
         left: col * cellSize + 20,
         child: SizedBox(
-          width: cellSize,
-          height: cellSize,
-          child: Center(
-            child: Image.asset(
-              'assets/images/queen.png',
-              fit: BoxFit.contain,
+            width: cellSize,
+            height: cellSize,
+            child: const Icon(
+              Icons.star,
+              color: Colors.red,
+            )
+            // Center(
+            //   child: Image.asset(
+            //     'assets/images/queen.png',
+            //     fit: BoxFit.contain,
+            //   ),
+            // ), // Add a chess queen image
             ),
-          ), // Add a chess queen image
-        ),
       );
     }).toList();
   }
